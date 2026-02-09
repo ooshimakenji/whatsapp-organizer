@@ -1,0 +1,7 @@
+node_modules/
+input/
+output/
+output-feedback/
+logs/
+*.csv
+verificacao-fotos*.txt
