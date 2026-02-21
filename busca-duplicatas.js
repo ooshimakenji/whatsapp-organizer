@@ -30,7 +30,7 @@ const CONCORRENCIA = 20; // Número de arquivos processados em paralelo
 async function calcularHash(caminhoArquivo) {
     try {
         const conteudo = await fsPromises.readFile(caminhoArquivo);
-        return crypto.createHash('md5').update(conteudo).digest('hex');
+        return crypto.createHash('sha256').update(conteudo).digest('hex');
     } catch (err) {
         // Retorna null para arquivos que não podem ser lidos
         return null;
@@ -96,7 +96,7 @@ function extrairCaminhoSubpasta(caminhoArquivo) {
 // LÓGICA PRINCIPAL
 // ============================================================================
 
-function analisarDuplicatas(pastaRaiz) {
+async function analisarDuplicatas(pastaRaiz) {
     console.log('\n📂 Buscando imagens...');
     const arquivos = buscarImagensRecursivo(pastaRaiz);
     console.log(`   Encontrados ${arquivos.length} arquivos de imagem\n`);
@@ -108,7 +108,7 @@ function analisarDuplicatas(pastaRaiz) {
 
     let processados = 0;
     for (const arquivo of arquivos) {
-        const hash = calcularHash(arquivo);
+        const hash = await calcularHash(arquivo);
 
         if (hash === null) {
             // Arquivo com erro
