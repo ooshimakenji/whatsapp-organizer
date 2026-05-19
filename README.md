@@ -1,10 +1,14 @@
 # WhatsApp Organizer
 
-Organiza fotos e vídeos do WhatsApp em pastas baseado nas legendas numéricas.
+![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white) ![JavaScript](https://img.shields.io/badge/JavaScript-ES6-F7DF1E?logo=javascript&logoColor=black) ![Licença](https://img.shields.io/badge/licença-MIT-green)
+
+Organiza fotos e vídeos de conversas exportadas do WhatsApp em pastas com base nas legendas numéricas enviadas pelos colaboradores.
 
 ## Instalação
 
 ```bash
+git clone https://github.com/ooshimakenji/whatsapp-organizer.git
+cd whatsapp-organizer
 npm install
 ```
 
@@ -17,9 +21,8 @@ Exporte a conversa do WhatsApp com mídia e extraia o ZIP na pasta `input/`:
 ```
 whatsapp-organizer/
 └── input/
-    ├── _chat.txt (ou qualquer .txt)
+    ├── _chat.txt
     ├── IMG-20251205-WA0104.jpg
-    ├── IMG-20251205-WA0105.jpg
     ├── VID-20251205-WA0139.mp4
     └── ...
 ```
@@ -49,31 +52,33 @@ output/
             └── 2024-12-05_16-04_IMG-050.jpg
 ```
 
-## Lógica de Organização
+## Lógica de organização
 
-### Legenda Numérica (forte)
-Se uma sequência de fotos tem uma legenda que é só números (ex: `2025171359`), todas vão para uma pasta com esse nome.
+### Legenda numérica (forte)
+Se uma sequência de fotos tem legenda composta apenas por números (ex: `2025171359`), todos os arquivos vão para uma pasta com esse nome.
 
-### Legenda Texto (fraca)
-Se não tem legenda numérica mas tem um texto, o arquivo vai para `sem_legenda/Autor/` com o texto no nome do arquivo.
+### Legenda de texto (fraca)
+Se não há legenda numérica mas existe um texto, o arquivo vai para `sem_legenda/Autor/` com o texto no nome.
 
-### Sem Legenda
-Arquivos sem nenhuma legenda vão para `sem_legenda/Autor/` apenas com timestamp.
+### Sem legenda
+Arquivos sem nenhuma legenda vão para `sem_legenda/Autor/` com apenas o timestamp.
 
 ### Blocos
 Um bloco é definido por:
 - Mesmo autor
-- Intervalo máximo de 2 minutos entre mídias
+- Intervalo máximo de 2 minutos entre mídias consecutivas
 
-## Alertas
+## Alertas gerados
 
-O script gera um relatório em `logs/` com alertas para:
+O script gera um relatório em `logs/` com os seguintes alertas:
 
-- ⚠️ **Mídia oculta**: arquivos não baixados
-- 📁 **Pasta unida**: mesmo número de serviço apareceu mais de uma vez
-- ⚠️ **Múltiplas legendas**: bloco com mais de uma legenda numérica
-- ℹ️ **Texto ignorado**: texto descartado em bloco com legenda numérica
-- ❌ **Arquivo não encontrado**: mídia mencionada mas não existe
+| Símbolo | Alerta |
+|---|---|
+| ⚠️ | **Mídia oculta** — arquivo não baixado |
+| 📁 | **Pasta unida** — mesmo número de serviço apareceu mais de uma vez |
+| ⚠️ | **Múltiplas legendas** — bloco com mais de uma legenda numérica |
+| ℹ️ | **Texto ignorado** — texto descartado em bloco com legenda numérica |
+| ❌ | **Arquivo não encontrado** — mídia mencionada mas inexistente |
 
 ## Configuração
 
@@ -82,9 +87,13 @@ Edite as constantes no início de `index.js`:
 ```javascript
 const CONFIG = {
   inputDir: 'input',
-  outputDir: 'output', 
+  outputDir: 'output',
   logsDir: 'logs',
-  toleranciaMinutos: 2,        // intervalo máximo entre mídias do mesmo bloco
+  toleranciaMinutos: 2,
   extensoesValidas: ['.jpg', '.jpeg', '.png', '.mp4'],
 };
 ```
+
+## Licença
+
+MIT
