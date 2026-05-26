@@ -2,7 +2,7 @@
 
 ![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white) ![JavaScript](https://img.shields.io/badge/JavaScript-ES6-F7DF1E?logo=javascript&logoColor=black) ![Licença](https://img.shields.io/badge/licença-MIT-green)
 
-Organiza fotos e vídeos de conversas exportadas do WhatsApp em pastas com base nas legendas numéricas enviadas pelos colaboradores.
+Organiza fotos e vídeos de conversas exportadas do WhatsApp em pastas separadas, conforme as legendas numéricas enviadas pelos colaboradores.
 
 ## Instalação
 
