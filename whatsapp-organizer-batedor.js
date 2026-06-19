@@ -25,8 +25,8 @@ const CONFIG = {
 const REGEX = {
   mensagem: /^(\d{2}\/\d{2}\/\d{4})\s+(\d{2}:\d{2})\s+-\s+([^:]+):\s*(.*)$/,
   anexo: /‎?(.+\.(jpg|jpeg|png|mp4))\s*\(arquivo anexado\)/i,
-  // OS: número de 10 dígitos começando com 2025 ou 2026
-  numeroOS: /\b(202[56]\d{6})\b/,
+  // OS: número de 10 dígitos começando com 20XX (antes era fixo em 2025/2026 e quebraria em 2027)
+  numeroOS: /\b(20\d{8})\b/,
   // Qualquer sequência numérica no início do texto (para capturar legendas inválidas)
   numeroLegenda: /^(\d+)/,
 };

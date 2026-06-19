@@ -2,7 +2,8 @@ import fs from 'fs';
 import path from 'path';
 
 const EXTENSOES_FOTO = ['.jpg', '.jpeg', '.png', '.webp'];
-const REGEX_PROTOCOLO = /^(202[56]\d{6})$/;
+// 10 dígitos começando com 20XX (antes era fixo em 2025/2026 e quebraria em 2027)
+const REGEX_PROTOCOLO = /^(20\d{8})$/;
 
 function getTimestamp() {
   const now = new Date();

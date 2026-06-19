@@ -9,9 +9,18 @@ WhatsApp Organizer - scripts Node.js para organizar mídias exportadas do WhatsA
 ## Comandos
 
 ```bash
+# Diagnóstico das órfãs (não copia nada) — entender por que fotos ficam sem pasta
+node analisar-orfas.js
+
 # Executar o organizador principal (tolerância 2 minutos)
 npm start
 node whatsapp-organizer.js --dry-run  # simula sem copiar
+node whatsapp-organizer.js --herdar    # (opcional) foto sem legenda herda protocolo do vizinho
+
+# Executar o organizador por ENDEREÇO (grupos que legendam com rua+número, não protocolo)
+node whatsapp-organizer-endereco.js --dry-run   # simula
+node whatsapp-organizer-endereco.js             # executa em PASTAS (herança por vizinho mais próximo, 25 min)
+node whatsapp-organizer-endereco.js --lista     # PASTÃO: 1 pasta, renomeia "seq - endereço - data" na ordem de envio
 
 # Executar o organizador BATEDOR (sem limite de tempo, agrupa por OS)
 node whatsapp-organizer-batedor.js --dry-run  # simula sem copiar
@@ -64,6 +73,16 @@ Organiza mídias por colaborador para feedback individual.
 3. **Estrutura**: `output-feedback/{colaborador}/{protocolo}/`
 4. **Log**: Resumo por colaborador com quantidade de fotos e protocolos
 
+### Fluxo Endereço (`whatsapp-organizer-endereco.js`)
+
+Para grupos que legendam com **endereço** (rua + número) em vez de protocolo numérico (ex.: grupo "Kazan asfalto").
+
+1. **Parser/Agrupamento**: reusa `parseChat` e `agruparBlocos` (importados de `whatsapp-organizer.js`); o endereço fica em `bloco.textos`
+2. **Endereço próprio + dedup**: `enderecoDoBloco()` pega a 1ª legenda que não seja nota; `enderecoKey()` normaliza (sem acento, sem prefixo de via "Rua/Av/...") para juntar variações de escrita num nome canônico
+3. **Herança por vizinho mais próximo**: foto sem endereço próprio (inclusive as com nota tipo "Material pra recolher") herda o endereço da âncora captionada MAIS PRÓXIMA no tempo, do mesmo autor, dentro de `--janela-heranca` (padrão 25 min)
+4. **Estrutura**: `output/enderecos-{timestamp}/{endereço}/` e `sem_legenda/{time}/` para o resto
+5. **`--lista` (pastão)**: tudo em `output/lista-{timestamp}/`, renomeado `{seq} - {endereço} - {data}.ext` na ordem de envio; sem endereço vira `NNNN - SEM ENDERECO - ...`
+
 ### Estrutura de Pastas
 
 - `input/` - Colocar o chat exportado (.txt) e as mídias
@@ -84,12 +103,18 @@ Essa lógica se aplica aos três scripts (organizer, batedor e feedbacker).
 
 ### Validação de Protocolo
 
-Protocolo válido deve ter exatamente **10 dígitos** começando com `2025` ou `2026`:
-- ✅ `2026010728` - válido
-- ❌ `202` - inválido (enviado para `sem_legenda/{autor}/202/`)
-- ❌ `6010728` - inválido (enviado para `sem_legenda/{autor}/6010728/`)
+Protocolo válido deve ter exatamente **10 dígitos** começando com um ano `20XX` (>= `anoMinimoProtocolo`,
+padrão 2025). É reconhecido em **qualquer posição** da legenda e tolera separadores (espaço/ponto/traço):
+- Válido: `2026010728` / `OS 2026010728 concluída` / `2026-010728` (todos resultam em `2026010728`)
+- Válido: `2027010728` (anos futuros aceitos; antes era fixo em 2025/2026)
+- Inválido: `202` (enviado para `sem_legenda/{autor}/202/`)
+- Inválido: `6010728` (enviado para `sem_legenda/{autor}/6010728/`)
 
 Protocolos inválidos geram alerta no log: `🔢 Protocolo "XXX" inválido`
+
+**Anexos** são reconhecidos nos formatos Android (`(arquivo anexado)` / `(file attached)`) e iOS
+(`<anexado: ...>`), e as extensões vêm de `CONFIG.extensoesValidas`. O cabeçalho de mensagem aceita ano de
+2 ou 4 dígitos, segundos e AM/PM. Blocos da mesma OS separados no tempo são unidos (reduz órfãs).
 
 ### Nomenclatura das Pastas de Output
 
@@ -100,6 +125,8 @@ As pastas são nomeadas com a **data/hora da última mensagem do chat** (não da
 
 ### Scripts Auxiliares
 
+- `analisar-orfas.js` - Diagnóstico READ-ONLY: classifica as fotos órfãs por causa (sem legenda / protocolo
+  inválido / múltiplos) e mostra quantas a melhoria recuperou. Reusa funções exportadas de `whatsapp-organizer.js`
 - `extractThumbnails.js` - Extrai frames de vídeos MP4 usando FFmpeg quando pasta tem menos de 3 JPGs
 - `listar-pastas.js` - Gera CSV com nomes de subpastas de um diretório
 - `busca-duplicatas.js` - Detecta e remove fotos duplicadas por hash MD5

@@ -25,8 +25,8 @@ const REGEX = {
   mensagem: /^(\d{2}\/\d{2}\/\d{4})\s+(\d{2}:\d{2})\s+-\s+([^:]+):\s*(.*)$/,
   anexo: /‎?(.+\.(jpg|jpeg|png|mp4))\s*\(arquivo anexado\)/i,
   numeroLegenda: /^(\d+)/,
-  // Protocolo válido: 10 dígitos começando com 2025 ou 2026
-  protocoloValido: /^(202[56]\d{6})$/,
+  // Protocolo válido: 10 dígitos começando com 20XX (antes era fixo em 2025/2026 e quebraria em 2027)
+  protocoloValido: /^(20\d{8})$/,
 };
 
 // Alertas acumulados

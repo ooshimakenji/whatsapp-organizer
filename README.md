@@ -26,7 +26,48 @@ Agrupa mídias por bloco (mesmo autor + intervalo máximo de 2 minutos) e distri
 ```bash
 npm start                             # executa
 node whatsapp-organizer.js --dry-run  # simula sem copiar arquivos
+node whatsapp-organizer.js --herdar   # (opcional) foto sem legenda herda o protocolo do vizinho
 ```
+
+**Reconhecimento de protocolo (anti-órfã):** o protocolo é detectado em **qualquer posição** da legenda
+(ex.: `OS 2026010728`, `protocolo: 2026010728`) e tolera separadores (`2026-010728`, `2026 010728`).
+Blocos da **mesma OS** separados no tempo são unidos automaticamente. Aceita anexos no formato Android
+(`(arquivo anexado)` / `(file attached)`) e iOS (`<anexado: ...>`).
+
+### `analisar-orfas.js` — Diagnóstico de órfãs (não copia nada)
+
+Mostra **quantas fotos ficam sem pasta de protocolo e por quê** (sem legenda / protocolo inválido /
+múltiplos protocolos) e quantas a melhoria recuperou. Use antes de organizar para entender as causas.
+
+```bash
+node analisar-orfas.js   # lê input/_chat.txt e imprime o relatório (salvo em logs/diagnostico-orfas.txt)
+```
+
+### `whatsapp-organizer-endereco.js` — Organização por ENDEREÇO
+
+Para grupos que legendam com **endereço** (rua + número) em vez de protocolo numérico. Cria uma pasta por
+endereço e junta as fotos do mesmo endereço. Recupera as fotos **sem legenda** herdando o endereço da foto
+captionada **mais próxima no tempo** do mesmo time (janela padrão 25 min). Junta variações de escrita do mesmo
+endereço (ex.: "Rua das camélias 143" = "Das camélias 143") e ignora notas ("Material pra recolher"), que
+também passam a buscar o endereço vizinho.
+
+```bash
+node whatsapp-organizer-endereco.js                 # executa (pastas por endereço)
+node whatsapp-organizer-endereco.js --lista         # PASTÃO: uma pasta só, renomeando por endereço
+node whatsapp-organizer-endereco.js --dry-run       # simula
+node whatsapp-organizer-endereco.js --sem-heranca   # não herda (foto sem legenda -> sem_legenda)
+node whatsapp-organizer-endereco.js --janela-heranca=25  # janela da herança em minutos (padrão 25)
+```
+
+Saídas:
+- **Padrão (pastas):** `output/enderecos-YYYY-MM-DD_HH-MM/{endereço}/` e `sem_legenda/{time}/`.
+- **`--lista` (pastão):** `output/lista-YYYY-MM-DD_HH-MM/` com tudo numa pasta só, renomeado na **ordem de
+  envio**: `{sequência} - {endereço} - {AAAA-MM-DD HH-MM}.ext`
+  (ex.: `0001 - Rua Abraão Bernardino Rocha 238 - 2026-06-03 12-54.jpg`). Fotos sem endereço viram
+  `NNNN - SEM ENDERECO - ....ext` na sua posição da sequência.
+
+> Nota: a herança pega o endereço da foto captionada **mais próxima no tempo** (mesmo time). Aumente
+> `--janela-heranca` para recuperar mais fotos isoladas; diminua se notar fotos indo para o endereço errado.
 
 ### `whatsapp-organizer-batedor.js` — Para colaboradores "batedores"
 
@@ -119,11 +160,15 @@ output/
 
 ### Protocolo válido
 
-Deve ter exatamente **10 dígitos** iniciando com `2025` ou `2026`:
+Deve ter exatamente **10 dígitos** iniciando com um ano `20XX` (>= `anoMinimoProtocolo`, padrão 2025).
+É reconhecido em qualquer posição da legenda e tolera espaços/pontos/traços entre os dígitos:
 
 | Legenda | Resultado |
 |---------|-----------|
 | `2026010728` | `output/2026010728/` |
+| `OS 2026010728 concluída` | `output/2026010728/` |
+| `2026-010728` | `output/2026010728/` |
+| `2027010728` | `output/2027010728/` (anos futuros aceitos) |
 | `202` | `sem_legenda/{autor}/202/` |
 | `6010728` | `sem_legenda/{autor}/6010728/` |
 
@@ -142,6 +187,9 @@ Deve ter exatamente **10 dígitos** iniciando com `2025` ou `2026`:
 Um bloco é definido por:
 - Mesmo autor
 - Intervalo máximo de 2 minutos entre mídias consecutivas
+
+Depois do agrupamento, blocos que apontam para o **mesmo protocolo** são unidos (mesmo separados no tempo),
+o que recupera fotos da mesma OS enviadas mais tarde.
 
 ---
 
@@ -170,7 +218,10 @@ const CONFIG = {
   outputDir: 'output',
   logsDir: 'logs',
   toleranciaMinutos: 2,      // intervalo máximo entre mídias do mesmo bloco
-  extensoesValidas: ['.jpg', '.jpeg', '.png', '.mp4'],
+  extensoesValidas: ['.jpg', '.jpeg', '.png', '.webp', '.mp4', '.mov', '.3gp'],
+  anoMinimoProtocolo: 2025,  // ano mínimo aceito no protocolo (futuro-proof)
+  herdarProtocolo: false,    // foto sem legenda herda protocolo do vizinho (ou use --herdar)
+  janelaHerancaMinutos: 5,   // janela de tempo da herança
   concorrencia: 10,          // arquivos copiados em paralelo
 };
 ```
