@@ -2,12 +2,11 @@
 
 ![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white) ![JavaScript](https://img.shields.io/badge/JavaScript-ES6-F7DF1E?logo=javascript&logoColor=black) ![Licença](https://img.shields.io/badge/licença-MIT-green)
 
-Conjunto de scripts Node.js para organizar mídias exportadas do WhatsApp em pastas baseadas em protocolos (OS) numéricos nas legendas.
+Script Node.js para organizar mídias exportadas do WhatsApp em pastas baseadas em protocolos (OS) numéricos nas legendas.
 
 ## Requisitos
 
 - Node.js 18+
-- FFmpeg instalado no sistema (apenas para `extractThumbnails.js`)
 
 ## Instalação
 
@@ -17,7 +16,7 @@ cd whatsapp-organizer
 npm install
 ```
 
-## Scripts
+## Script
 
 ### `whatsapp-organizer.js` — Organizador principal
 
@@ -34,87 +33,9 @@ node whatsapp-organizer.js --herdar   # (opcional) foto sem legenda herda o prot
 Blocos da **mesma OS** separados no tempo são unidos automaticamente. Aceita anexos no formato Android
 (`(arquivo anexado)` / `(file attached)`) e iOS (`<anexado: ...>`).
 
-### `analisar-orfas.js` — Diagnóstico de órfãs (não copia nada)
-
-Mostra **quantas fotos ficam sem pasta de protocolo e por quê** (sem legenda / protocolo inválido /
-múltiplos protocolos) e quantas a melhoria recuperou. Use antes de organizar para entender as causas.
-
-```bash
-node analisar-orfas.js   # lê input/_chat.txt e imprime o relatório (salvo em logs/diagnostico-orfas.txt)
-```
-
-### `whatsapp-organizer-endereco.js` — Organização por ENDEREÇO
-
-Para grupos que legendam com **endereço** (rua + número) em vez de protocolo numérico. Cria uma pasta por
-endereço e junta as fotos do mesmo endereço. Recupera as fotos **sem legenda** herdando o endereço da foto
-captionada **mais próxima no tempo** do mesmo time (janela padrão 25 min). Junta variações de escrita do mesmo
-endereço (ex.: "Rua das camélias 143" = "Das camélias 143") e ignora notas ("Material pra recolher"), que
-também passam a buscar o endereço vizinho.
-
-```bash
-node whatsapp-organizer-endereco.js                 # executa (pastas por endereço)
-node whatsapp-organizer-endereco.js --lista         # PASTÃO: uma pasta só, renomeando por endereço
-node whatsapp-organizer-endereco.js --dry-run       # simula
-node whatsapp-organizer-endereco.js --sem-heranca   # não herda (foto sem legenda -> sem_legenda)
-node whatsapp-organizer-endereco.js --janela-heranca=25  # janela da herança em minutos (padrão 25)
-```
-
-Saídas:
-- **Padrão (pastas):** `output/enderecos-YYYY-MM-DD_HH-MM/{endereço}/` e `sem_legenda/{time}/`.
-- **`--lista` (pastão):** `output/lista-YYYY-MM-DD_HH-MM/` com tudo numa pasta só, renomeado na **ordem de
-  envio**: `{sequência} - {endereço} - {AAAA-MM-DD HH-MM}.ext`
-  (ex.: `0001 - Rua Abraão Bernardino Rocha 238 - 2026-06-03 12-54.jpg`). Fotos sem endereço viram
-  `NNNN - SEM ENDERECO - ....ext` na sua posição da sequência.
-
-> Nota: a herança pega o endereço da foto captionada **mais próxima no tempo** (mesmo time). Aumente
-> `--janela-heranca` para recuperar mais fotos isoladas; diminua se notar fotos indo para o endereço errado.
-
-### `whatsapp-organizer-batedor.js` — Para colaboradores "batedores"
-
-Variação sem limite de tempo entre mensagens. Uma linha vazia do autor define o fim de um bloco. Indicado para quem envia fotos com intervalos maiores.
-
-```bash
-node whatsapp-organizer-batedor.js --dry-run  # simula
-node whatsapp-organizer-batedor.js            # executa
-```
-
-Output: `output/batedor-YYYY-MM-DD_HH-MM/`
-
-### `whatsapp-feedbacker.js` — Organização por colaborador
-
-Separa as mídias por colaborador para facilitar o feedback individual.
-
-```bash
-node whatsapp-feedbacker.js --dry-run  # simula
-node whatsapp-feedbacker.js            # executa
-```
-
-Output: `output-feedback/feedback-YYYY-MM-DD_HH-MM/{colaborador}/{protocolo}/`
-
-### `listar-pastas.js` — Gera CSV de subpastas
-
-```bash
-node listar-pastas.js <diretorio> [arquivo_saida.csv]
-```
-
-### `extractThumbnails.js` — Extrai frames de vídeos MP4
-
-Extrai o primeiro frame de vídeos em pastas com menos de 3 JPGs. Requer FFmpeg instalado no sistema.
-
-```bash
-node extractThumbnails.js
-```
-
-### `busca-duplicatas.js` — Localiza e remove fotos duplicadas por hash MD5
-
-```bash
-node busca-duplicatas.js "C:\caminho\para\pasta"            # apenas visualização
-node busca-duplicatas.js "C:\caminho\para\pasta" --deletar  # executa as deleções
-```
-
 ---
 
-## Uso do Organizador Principal
+## Uso
 
 ### 1. Prepare os arquivos
 
