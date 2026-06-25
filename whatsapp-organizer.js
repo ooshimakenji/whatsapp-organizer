@@ -113,12 +113,6 @@ function diferencaMinutos(data1, data2) {
   return Math.abs(d1 - d2) / (1000 * 60);
 }
 
-function extrairNumeroLegenda(texto) {
-  if (!texto) return null;
-  const match = texto.trim().match(REGEX.numeroLegenda);
-  return match ? match[1] : null;
-}
-
 // Valida se o número é um protocolo válido: 10 dígitos começando com um ano >= anoMinimoProtocolo.
 function isProtocoloValido(numero) {
   if (!numero) return false;
@@ -552,12 +546,12 @@ async function processarBlocos(blocos, outputBase) {
     
     // Monta tarefas de cópia
     let indiceSequencial = 1;
+    const autorSanitizado = sanitizarNomeAutor(bloco.autor);
     for (const midia of bloco.midias) {
       const arquivoOrigem = path.join(CONFIG.inputDir, midia.arquivo);
 
       // Monta nome do arquivo
       const timestamp = formatarTimestampArquivo(midia.data);
-      const autorSanitizado = sanitizarNomeAutor(bloco.autor);
       let nomeArquivo;
 
       if (tipoBloco === 'legenda_numerica') {
