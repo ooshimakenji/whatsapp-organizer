@@ -5,6 +5,7 @@
   "main": "whatsapp-organizer.js",
   "type": "module",
   "scripts": {
-    "start": "node whatsapp-organizer.js"
+    "start": "node whatsapp-organizer.js",
+    "ingerir": "node --env-file=.env ingerir-ambiente.js"
   }
 }
